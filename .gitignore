@@ -16,3 +16,4 @@ runs/
 .env
 data/
 runs/
+yolo11s.pt
