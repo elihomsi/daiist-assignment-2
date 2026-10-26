@@ -17,3 +17,4 @@ runs/
 data/
 runs/
 yolo11s.pt
+tmp*.py
