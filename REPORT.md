@@ -103,7 +103,7 @@ I priced four designs for 1,000 returns, with 5% damaged cars:
 | The model decides alone (best single threshold, 0.51) | €10,036 | 0 |
 | Model plus review (my design) | €2,426 | about 0.6 |
 
-Doing nothing costs 50 damaged cars times €400. The model deciding alone is expensive, because it misses damaged cars and wrongly charges clean ones, whike my design is the cheapest. Compared with checking every car, it saves about €575 per 1,000 returns (about €290 a day) and about 6 people.
+Doing nothing costs 50 damaged cars times €400. The model deciding alone is expensive, because it misses damaged cars and wrongly charges clean ones, whike my design is the cheapest. Compared with checking every car, it saves about €575 per 1,000 returns (about €290 a day) and needs about 6 fewer people (about 0.6 instead of about 7).
 
 Reviewing less saves time, not money. With a cap of 5%, the best design costs €5,052, more than having a person check every car, because a review costs only €3. So my 10% cap is a decision about workload, and it costs about €1,100 more per 1,000 returns than a design with no cap.
 
