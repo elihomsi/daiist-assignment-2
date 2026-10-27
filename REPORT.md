@@ -7,13 +7,13 @@
 
 ## Business problem, and the cost of being wrong
 
-The model is intended to be used by car rental companies, which would take a picture to each car when a customer returns it. The model would cheack each photo for new body damage, and then, if it detects a damage above certain confidence threshold, the car is flagged to have certain damage. Moreover, the image would be revised by a supervisor, and if the damage is real and new, the customer would be charged and sends the car for repair.
+The model is intended to be used by car rental companies, which would take a picture to each car when a customer returns it. The model would cheack each photo for new body damage, and then, if it detects a damage above certain confidence threshold, the car is flagged to have certain damage. Moreover, the image would be revised by a supervisor when the model is unsure, and if the damage is real and new, the customer would be charged and sends the car for repair.
 
 A false alarm for this model would represent a waste of time for the company's staff, that would have to revise a car that had no any new damage. On the other side, a missed damage would mean that a damaged car would be marked as clean, which could cost the company money since they can't bill any customer; there would not be any clear path or clue about which customer was the one who damaged the car, which will make this issue untracable and therefore, the damage would need to be covered by the company.
 
 I assume a false alarm could costs about €3: roughly 5 minutes of a supervisor’s time at about €20 per hour (about €1.70), plus a small delay before the car can be rented out again. On the other side, a missed damage could costs, lets say, about €400, the average repair bill the company has to cover itself because it can no longer bill the customer who caused it. A damaged car that gets flagged also costs about €3, because the supervisor reviews it before it is billed.
 
-In this sense, missed damage is therefore the worse error, because a review costs minutes of staff time while an unbilled repair costs hundreds of euros. Because of this, the confidence threshold should lean low, so the model flags more borderline cars and misses fewer real damages. A person reviews the cars where the model is unsure, and the model acts almost alone only when it is very sure.
+In this sense, missed damage is therefore the worse error, roughly 130 times worse (€400 against €3), because a review costs minutes of staff time while an unbilled repair costs hundreds of euros. Because of this, the confidence threshold should lean low, so the model flags more borderline cars and misses fewer real damages. A person reviews the cars where the model is unsure, and the model acts alone only when it is very sure.
 
 ## Dataset
 
@@ -70,7 +70,7 @@ This is what the model mixes up on the test photos:
 
 The model makes the same number of mistakes in both directions: 8 damaged cars called undamaged and 8 undamaged cars called damaged; however, for the business scenario they are not equal. A damaged car called undamaged is a repair of about €400 that is not billed, while an undamaged car called damaged usually only costs a supervisor about €3 to check. One more damaged car was not found at all. The model's own matrix also has a very large "background" column, which counts boxes drawn at almost zero confidence, so I do not read it as real false alarms, and I measure false alarms per photo in the cost analysis.
 
-Where it breaks is on damaged cars that get a low score. At a threshold of 0.5 the model flags 66 of the 92 damaged cars, so 26 would go back out as clean. At a very low threshold of 0.02 it flags 88, and only 4 are missed; this is why my final design passes a car only when its score is very low (below 0.12) and sends the unsure cars to a person. 
+Where it breaks is on damaged cars that get a low score. The number of damaged cars the model finds depends on the confidence level used to measure it: the recall and the matrix above use levels set by the evaluation, while here I count a photo as flagged at a threshold that I choose. At a threshold of 0.5 the model flags 66 of the 92 damaged cars, so 26 would go back out as clean. At a very low threshold of 0.02 it flags 88, and only 4 are missed; this is why my final design passes a car only when its score is very low (below 0.12) and sends the unsure cars to a person. 
 
 ## Cost matrix and operating point
 
@@ -83,16 +83,16 @@ I proposed a cost for each outcome for one returned car, based on how a car rent
 | A clean car is failed automatically, with no person (wrong charge) | €250 | a refund, a complaint and the risk of losing the customer; used in the next section |
 | A clean car passes, or a damaged car is failed correctly | €0 | nothing extra happens |
 
-A missed damage is therefore much worse than a false alarm (€400 against €3), so the threshold should lean low. I express every cost per 1,000 returns of cars from a rental branch, so the results are easy to compare across designs.
-I tested every threshold from 0 to 1 and took the cheapest, with resulted to be 0.02, at €1,388 per 1,000 returns, against €5,835 at the provisional 0.5. However, at a threshold of 0.02 the model catches almost all damaged cars (88 of 92), but it sends about 17% of all returns to a person, which I considered that too much work, so my final operating point is a two-threshold design in the next section, while I keep 0.02 as the cheapest single threshold.
+A missed damage is therefore much worse than a false alarm (€400 against €3), so the threshold should lean low. I express every cost per 1,000 returns of cars from a rental branch, assuming that 5% of them (50 cars) have new damage, so the results are easy to compare across designs. My test photos have about 45% damaged cars, so I apply the model's results on those photos to a more realistic mix of 50 damaged and 950 clean cars.
+I tested every threshold from 0 to 1 and took the cheapest, with resulted to be 0.02, at €1,388 per 1,000 returns, against €5,835 at the provisional 0.5. However, at a threshold of 0.02 the model catches almost all damaged cars (88 of 92), but it sends about 17% of all returns to a person. I considered that too much work, so my final operating point is a two-threshold design in the next section, while I keep 0.02 as the cheapest single threshold.
 
-The figure that would change the answer most is the cost of a missed damage. The best threshold stays at 0.02 as long as a miss costs at least about €100, and it only rises if a miss costs much less. The share of damaged cars matters too: with far fewer damaged cars, a higher threshold would be best. I also picked the threshold on the same test photos that I report on, and only 92 of them are damaged, so the result is probably a bit optimistic.
+The figure that would change the answer most is the cost of a missed damage. The best single threshold stays at 0.02 as long as a miss costs at least about €100, and it only rises if a miss costs much less. The share of damaged cars matters too: with far fewer damaged cars, a higher threshold would be best. The two thresholds of the final design also depend on the 10% cap on reviews (a 5% cap would give 0.34 and 0.57) and on the €250 cost of a wrong automatic charge, whose effect I did not test. I also picked the threshold on the same test photos that I report on, and only 92 of them are damaged, so the result is probably a bit optimistic.
 
 ## What a person still has to check
 
-I use two thresholds on the model's score. A car with a score below 0.12 passes without a person, a car with 0.70 or more fails without a person, and a person reviews the cars in between. I chose them as the cheapest pair that sends at most 10% of returns to a person, using the €250 cost of a wrong automatic charge.
+I use two thresholds on the model's score. A car with a score below 0.12 passes without a person, a car with 0.70 or more fails without a person, and a person reviews the cars in between. I chose them as the cheapest pair that sends at most 10% of returns to a person, using the €250 cost of a wrong automatic charge. I tried caps of 5%, 10% and no cap; with no cap about 15% of returns go to a person (close to the 17% of the single threshold), which I considered too much, so I chose 10% (the 5% cap is discussed below).
 
-For every 1,000 returns, this sends about 84 cars to a person (8.4%). For a large branch with 500 returns a day, that is about 42 reviews a day. At 5 minutes each it is about 3.5 hours a day, and at 6 productive hours per person that is about 0.6 of a person. 
+For every 1,000 returns, this sends about 84 cars to a person (8.4%). For a large branch with 500 returns a day, that is about 42 reviews a day. At 5 minutes each it is about 3.5 hours a day, and at 6 productive hours per person that is about 0.6 of a person. This looks realistic for a large branch, since one part-time reviewer is enough, but it depends on my assumption of 5 minutes per review and on the reviewer never making a mistake, which I did not test.
 
 I priced four designs for 1,000 returns, with 5% damaged cars:
 
