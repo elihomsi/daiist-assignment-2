@@ -13,7 +13,7 @@ A false alarm for this model would represent a waste of time for the company's s
 
 I assume a false alarm could costs about €3: roughly 5 minutes of a supervisor’s time at about €20 per hour (about €1.70), plus a small delay before the car can be rented out again. On the other side, a missed damage could costs, lets say, about €400, the average repair bill the company has to cover itself because it can no longer bill the customer who caused it. A damaged car that gets flagged also costs about €3, because the supervisor reviews it before it is billed.
 
-In this sense, missed damage is therefore the worse error, roughly 130 times worse (€400 against €3), because a review costs minutes of staff time while an unbilled repair costs hundreds of euros. Because of this, the confidence threshold should lean low, so the model flags more borderline cars and misses fewer real damages. A person reviews the cars where the model is unsure, and the model acts alone only when it is very sure.
+In this sense, missed damage is therefore the worse error (€400 against €3), because a review costs minutes of staff time while an unbilled repair costs hundreds of euros. Because of this, the confidence threshold should lean low, so the model flags more borderline cars and misses fewer real damages. A person reviews the cars where the model is unsure, and the model acts alone only when it is very sure.
 
 ## Dataset
 
